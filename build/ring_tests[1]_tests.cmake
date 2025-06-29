@@ -1,0 +1,3 @@
+add_test([=[Dummy.SetupChecker]=]  /home/asher/cpp-projects/Thread-Safe-Blocking-Ring-Buffer/build/ring_tests [==[--gtest_filter=Dummy.SetupChecker]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[Dummy.SetupChecker]=]  PROPERTIES WORKING_DIRECTORY /home/asher/cpp-projects/Thread-Safe-Blocking-Ring-Buffer/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  ring_tests_TESTS Dummy.SetupChecker)

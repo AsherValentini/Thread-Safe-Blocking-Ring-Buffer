@@ -1,0 +1,5 @@
+if(EXISTS "/home/asher/cpp-projects/Thread-Safe-Blocking-Ring-Buffer/build/ring_tests[1]_tests.cmake")
+  include("/home/asher/cpp-projects/Thread-Safe-Blocking-Ring-Buffer/build/ring_tests[1]_tests.cmake")
+else()
+  add_test(ring_tests_NOT_BUILT ring_tests_NOT_BUILT)
+endif()
