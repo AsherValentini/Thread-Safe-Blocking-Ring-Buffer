@@ -7,24 +7,54 @@
 #include <condition_variable>
 #include <mutex>
 
-template <typename T, std::size_t Capacity = 1024>
+template <typename T, std::size_t Capacity = 4>
 class RingBuffer {
 public:
-  RingBuffer() : head_(0), tail_(0) {}
-  void push() {
-    // thread management
+  RingBuffer() : head_(0), tail_(0), shutDown_(false) {}
+  void push(std::shared_ptr<T> sharedPtr) {
+
     std::unique_lock<std::mutex> myLock(mtx_);
-    prodCV_.wait(myLock, [this]() {
-      return
-    });
+    std::size_t next = increment(head_);
+    prodCV_.wait(myLock, [&]() { return next != tail_ || shutDown_; });
+
+    if (shutDown_) {
+      std::cout << "[RingBuffer] shutdown" << std::endl;
+      return;
+    }
+    std::cout << "[RingBuffer] pushed tick: " << *sharedPtr << std::endl;
+
+    buffer_[head_] = std::move(sharedPtr);
+    head_ = next;
+
+    consCV_.notify_all();
   }
 
-  std::optional<std::shared_ptr<T>> pop() { return std::nullopt; }
+  std::shared_ptr<T> pop() {
+    std::unique_lock<std::mutex> myLock(mtx_);
+    consCV_.wait(myLock, [this]() { return head_ != tail_; });
+
+    auto ptr = std::move(buffer_[tail_]);
+    tail_ = increment(tail_);
+
+    prodCV_.notify_all();
+
+    std::cout << "[RingBuffer] popped tick: " << *ptr << std::endl;
+
+    return ptr;
+  }
+
+  void shutDown() {
+    {
+      std::unique_lock<std::mutex> myLock(mtx_);
+      shutDown_ = true;
+    }
+    prodCV_.notify_all();
+  }
 
 private:
-  void increment(std::size_t& index) {
+  std::size_t increment(std::size_t index) {
     // wrap around incrementer
-    index = (index + 1) % Capacity;
+    return (index + 1) % Capacity;
   }
   std::array<std::shared_ptr<T>, Capacity> buffer_;
   std::size_t head_;
@@ -33,4 +63,6 @@ private:
   std::mutex mtx_;
   std::condition_variable prodCV_;
   std::condition_variable consCV_;
+
+  bool shutDown_;
 };
