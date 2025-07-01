@@ -3,11 +3,6 @@
 #include "ring_buffer.hpp"
 #include "tick.hpp"
 
-std::ostream& operator<<(std::ostream& os, Tick tick) {
-  os << tick.symbol_ << " " << tick.price_;
-  return os;
-}
-
 // producer thread
 void producer(std::shared_ptr<RingBuffer<Tick>>& buffer) {
   auto p1 = std::make_shared<Tick>("AAPL", 10.01);

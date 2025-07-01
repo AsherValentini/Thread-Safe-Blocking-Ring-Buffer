@@ -6,6 +6,7 @@
 #include <array>
 #include <condition_variable>
 #include <mutex>
+#include <iostream>
 
 template <typename T, std::size_t Capacity = 4>
 class RingBuffer {
